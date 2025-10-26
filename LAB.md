@@ -134,3 +134,10 @@
 ---
 
 # 8. Calculate monthly budget
+![img.png](screenshots/8-prices.png)
+
+- EC2 (coordinator), t3.small = USD 5.64/month
+- EC2 (shards x2) t3.medium = USD 8.14/ month * 2 = USD 16.28/month
+- Data transfer out = free until < 100 GB = $0.
+- Cloudwatch, logs, snapshots = USD 2/month
+Total: 23.92$
