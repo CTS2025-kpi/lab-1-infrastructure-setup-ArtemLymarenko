@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  CloudFormation template for WriteAccessUserRole and AssumeRole policy.
+  This template creates:
+    1. A role (WriteAccessUserRole) that grants write permissions.
+    2. A managed policy (AllowAssumeWriteAccessRole) allowing specific user/role to assume it.
+
+Resources:
+  # --- IAM Role granting write access ---
+  WriteAccessUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: WriteAccessUserRole
+      Description: "Role granting write access, assumable by SSO existing role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: "arn:aws:iam::560976331216:role/ReadOnlyUserRole"
+            Action: "sts:AssumeRole"
+      # Attach AWS-managed policy with write (power-user) permissions
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/PowerUserAccess
+
+  # --- Custom Managed Policy allowing assumption of the above role ---
+  AssumeWriteAccessRolePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: AllowAssumeWriteAccessRole
+      Description: "Policy that allows assuming WriteAccessUserRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAssumeWriteAccessRole
+            Effect: Allow
+            Action: "sts:AssumeRole"
+            Resource: !GetAtt WriteAccessUserRole.Arn
+
+Outputs:
+  WriteRoleArn:
+    Description: ARN of the created WriteAccessUserRole
+    Value: !GetAtt WriteAccessUserRole.Arn
+
+  AssumePolicyArn:
+    Description: ARN of the managed policy that allows assuming the write role
+    Value: !Ref AssumeWriteAccessRolePolicy
